@@ -1,0 +1,258 @@
+const { downloadMediaMessage } = require("@whiskeysockets/baileys");
+const Pino = require("pino");
+
+module.exports = async (
+  reinbot,
+  msg,
+  id,
+  media,
+  isGroup,
+  userId,
+  groupId,
+  isMe,
+  isOwner,
+  msgType,
+  msgText,
+  command,
+  text,
+  logCommand,
+  reply,
+  replyCommand,
+  onlyOwner,
+  onlyGroup,
+  setting,
+  groupMetadata,
+  participants,
+  logger
+) => {
+  switch (command) {
+    case "broadddvfcasts":
+    case "broahzhddcast":
+    case "bchhsshsh":
+      reinbot.busy = true;
+      logCommand();
+      try {
+        await replyCommand(
+          `■\x20*BROADCASTV1*\x20┓\n┗\x20Mengirim pesan ke semua data pengguna\n■\x20*BROADCASTV2*\x20┓\n┗\x20Mengirim pesan ke semua anggota atau member group\n■\x20*BROADCASTV3*\x20┓\n┗\x20Mengirim pesan ke semua anggota atau member group target id`
+        );
+        reinbot.busy = false;
+      } catch (err) {
+        logger("error", "BROADCAST", err);
+        await replyCommand(err);
+        reinbot.busy = false;
+      }
+      break;
+    case "broadcashndtsv1":
+    case "broadcadjdjdstv1":
+    case "bcv1":
+      reinbot.busy = true;
+      logCommand();
+      if (!isMe && !isOwner) {
+        await replyCommand();
+        reinbot.busy = false;
+        return;
+      }
+      if (!text) {
+        logger(
+          "error",
+          "BROADCASTV1",
+          `‼️\x20\x20\x1b[1mPerintah kurang lengkap atau tidak valid\x1b[0m\n\x20\x20\x1b[1mContoh:\x1b[0m\x20.broadcastv1\x20Hello world\n\x20\x20\x1b[1mTUTORIAL:\x1b[0m\x20${reinbot.tutorial.broadcast}`
+        );
+        await replyCommand(
+          `‼️\x20*Perintah kurang lengkap atau tidak valid*\n*Contoh:*\x20.broadcastv1\x20Hello world\n*TUTORIAL:*\x20${reinbot.tutorial.broadcast}`
+        );
+        reinbot.busy = false;
+        return;
+      }
+      require("../utils/readUsers")()
+        .then(async (res) => {
+          if (!res.data || res.data.length === 0) {
+            logger(
+              "error",
+              "BROADCASTV1",
+              `‼️\x20\x20\x1b[1mData pengguna ${
+                res.data.length || 0
+              }\n\x20\x20Dapatkan data pengguna lebih banyak!\n\x20\x20\x1b[1mTUTORIAL:\x1b[0m\x20${
+                reinbot.tutorial.saveUsers
+              }`
+            );
+            await replyCommand(
+              `‼️\x20*Data pengguna ${
+                res.data.length || 0
+              }*\nDapatkan data pengguna lebih banyak!\n*TUTORIAL:*\x20${
+                reinbot.tutorial.saveUsers
+              }`
+            );
+            reinbot.busy = false;
+            return;
+          } else {
+            await replyCommand(
+              `🎉\x20*BROADCAST START*\n*Target:*\x20${res.data.length}\x20pengguna\n*Limit:*\x20${reinbot.broadcast.limit}\n*Delay:*\x20${reinbot.broadcast.delay}ms`
+            );
+            if (msgType === "imageMessage") {
+              media = await downloadMediaMessage(
+                msg,
+                "buffer",
+                {},
+                { logger: Pino }
+              );
+              return require("../utils/broadcast")(
+                reinbot,
+                msg,
+                res.data,
+                text,
+                msgType,
+                media
+              );
+            } else {
+              return require("../utils/broadcast")(
+                reinbot,
+                msg,
+                res.data,
+                text
+              );
+            }
+          }
+        })
+        .catch(async (err) => {
+          logger("error", "BROADCASTV1", err);
+          await replyCommand(err);
+          reinbot.busy = false;
+        });
+      break;
+    case "broadcasjdjftsv2":
+    case "broadcjdjdhastv2":
+    case "bcv2":
+      reinbot.busy = true;
+      logCommand();
+      if (!isMe && !isOwner) {
+        await replyCommand();
+        reinbot.busy = false;
+        return;
+      }
+      if (!isGroup) {
+        await onlyGroup();
+        reinbot.busy = false;
+        return;
+      } else {
+        if (!text) {
+          logger(
+            "error",
+            "BROADCASTV2",
+            `‼️\x20\x20\x1b[1mPerintah kurang lengkap atau tidak valid\x1b[0m\n\x20\x20\x1b[1mContoh:\x1b[0m\x20.broadcastv2\x20Hello world\n\x20\x20\x1b[1mTUTORIAL:\x1b[0m\x20${reinbot.tutorial.broadcast}`
+          );
+          await replyCommand(
+            `‼️\x20*Perintah kurang lengkap atau tidak valid*\n*Contoh:*\x20.broadcastv2\x20Hello world\n*TUTORIAL:*\x20${reinbot.tutorial.broadcast}`
+          );
+          reinbot.busy = false;
+          return;
+        }
+        try {
+          groupMetadata = await reinbot.groupMetadata(groupId);
+          participants = groupMetadata.participants.map((part) => part.id);
+          await replyCommand(
+            `🎉\x20\x20*BROADCAST START*\n*Nama group:*\x20${
+              groupMetadata.subject
+            }\n*Owner:*\x20${
+              groupMetadata.owner?.split("@")[0]
+            }\n*Target:*\x20${participants.length}\x20pengguna\n*Limit:*\x20${
+              reinbot.broadcast.limit
+            }\n*Delay:*\x20${reinbot.broadcast.delay}ms`
+          );
+          if (msgType === "imageMessage") {
+            media = await downloadMediaMessage(
+              msg,
+              "buffer",
+              {},
+              { logger: Pino }
+            );
+            require("../utils/broadcast")(
+              reinbot,
+              msg,
+              participants,
+              text,
+              msgType,
+              media
+            );
+          } else {
+            require("../utils/broadcast")(reinbot, msg, participants, text);
+          }
+        } catch (err) {
+          logger("error", "BROADCASTV2", err);
+          await replyCommand(err);
+          reinbot.busy = false;
+        }
+      }
+      break;
+    case "broadcasthxjcsv3":
+    case "broadcdhhdhxastv3":
+    case "bcv3":
+      reinbot.busy = true;
+      logCommand();
+      if (!isMe && !isOwner) {
+        await replyCommand();
+        reinbot.busy = false;
+        return;
+      }
+      if (!text || !text.split("|")[0] || !text.split("|")[1]) {
+        logger(
+          "error",
+          "BROADCASTV3",
+          `‼️\x20\x20\x1b[1mPerintah kurang lengkap atau tidak valid\x1b[0m\n\x20\x20\x1b[1mContoh:\x1b[0m\x20.broadcastv3\x20Hello world\n\x20\x20\x1b[1mTUTORIAL:\x1b[0m\x20${reinbot.tutorial.broadcast}`
+        );
+        await replyCommand(
+          `‼️\x20*Perintah kurang lengkap atau tidak valid*\n*Contoh:*\x20.broadcastv3\x20Hello world\n*TUTORIAL:*\x20${reinbot.tutorial.broadcast}`
+        );
+        reinbot.busy = false;
+        return;
+      } else {
+        try {
+          if (text.split("|")[0].endsWith("@g.us")) {
+            groupMetadata = await reinbot.groupMetadata(text.split("|")[0]);
+          } else {
+            groupMetadata = await reinbot.groupMetadata(
+              `${text.split("|")[0]}@g.us`
+            );
+          }
+          participants = groupMetadata.participants.map((part) => part.id);
+          await replyCommand(
+            `🎉\x20\x20*BROADCAST START*\n*Nama group:*\x20${
+              groupMetadata.subject
+            }\n*Owner:*\x20${
+              groupMetadata.owner?.split("@")[0]
+            }\n*Target:*\x20${participants.length}\x20pengguna\n*Limit:*\x20${
+              reinbot.broadcast.limit
+            }\n*Delay:*\x20${reinbot.broadcast.delay}ms`
+          );
+          if (msgType === "imageMessage") {
+            media = await downloadMediaMessage(
+              msg,
+              "buffer",
+              {},
+              { logger: Pino }
+            );
+            return require("../utils/broadcast")(
+              reinbot,
+              msg,
+              participants,
+              text.split("|")[1],
+              msgType,
+              media
+            );
+          } else {
+            return require("../utils/broadcast")(
+              reinbot,
+              msg,
+              participants,
+              text.split("|")[1]
+            );
+          }
+        } catch (err) {
+          logger("error", "BROADCASTV3", err);
+          await replyCommand(err);
+          reinbot.busy = false;
+        }
+      }
+      break;
+  }
+};

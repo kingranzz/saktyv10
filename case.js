@@ -1,0 +1,251 @@
+const { readFileSync } = require("fs");
+const { join } = require("path");
+const logger = require("./utils/logger");
+const getDateTime = require("./utils/getDateTime");
+
+module.exports = async (
+  reinbot,
+  msg,
+  id,
+  media,
+  isGroup,
+  userId,
+  groupId,
+  isMe,
+  isOwner,
+  msgType,
+  msgText,
+  command,
+  text,
+  logCommand,
+  reply,
+  replyCommand,
+  onlyOwner,
+  onlyGroup
+) => {
+  const setting = JSON.parse(
+    readFileSync(join(__dirname, "./data/setting.json"))
+  );
+  let groupMetadata;
+  let participants;
+  switch (command) {
+    case "ranz":
+    case "ranj":
+      reinbot.busy = true;
+      logCommand();
+      const listCommand = `■\x20*MENU*\x20┓\n┗\x20Menampilkan daftar perintah\n■\x20*USER*\x20┓\n┗\x20Data pengguna\n■\x20*GROUP*\x20┓\n┗\x20Menampilkan data group\n■\x20*BROADCAST*\x20┓\n┗\x20Broadcast otomatis\n■\x20*PUSHKONTAK*\x20┓\n┗\x20Push kontak otomatis\n■\x20*SAVEKONTAK*\x20┓\n┗\x20Menyimpan kontak otomatis\n■\x20*SETTING*\x20┓\n┗\x20Pengaturan bot`;
+      const notes = `‼️\x20*NOTES:*\n•\x20*Prefix command:*\x20Tambahkan . (titik) disetiap awal perintah\n•\x20*DWYOR:*\x20do with your own ranz\n•\x20*${reinbot.name}*\x20Dikembangkan bukan untuk promosi *JUDI* atau bahkan untuk *PENIPUAN*\n•\x20Jangan terlalu barbar *STAY SAFE* ✌️`;
+      try {
+        await reinbot.sendMessage(
+          id,
+          {
+            image: { url: "./data/menu.png" },
+            caption: `⚡\x20*${reinbot.name}\x20ヅ*\x20|\x20*MENU*\x20${
+              setting.features.safeMode.status ? "🛡️" : "🤖"
+            }\n\n${listCommand}\n\n${notes}\n\n*⌱\x20${getDateTime()}*\n`,
+          },
+          { quoted: msg }
+        );
+        reinbot.busy = false;
+      } catch (err) {
+        logger("error", "COMMAND MENU", err);
+        await replyCommand(err);
+        reinbot.busy = false;
+      }
+      break;
+    default:
+      require("./features/users")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/groups")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/contacts")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/broadcast")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/pushkontak")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/savekontak")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/setting")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      require("./features/lainnya")(
+        reinbot,
+        msg,
+        id,
+        media,
+        isGroup,
+        userId,
+        groupId,
+        isMe,
+        isOwner,
+        msgType,
+        msgText,
+        command,
+        text,
+        logCommand,
+        reply,
+        replyCommand,
+        onlyOwner,
+        onlyGroup,
+        setting,
+        groupMetadata,
+        participants,
+        logger
+      );
+      break;
+  }
+};

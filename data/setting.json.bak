@@ -1,0 +1,9 @@
+{
+  "features": {
+    "broadcast": { "status": true, "blacklist": ["6285174174657"] },
+    "pushContacts": { "status": true, "blacklist": ["6285174174657"] },
+    "antiCall": { "status": true },
+    "safeMode": { "status": false }
+  }
+}
+

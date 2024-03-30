@@ -1,0 +1,126 @@
+const logger = require("../utils/logger.js");
+const { readFileSync } = require("fs");
+const { join } = require("path");
+const getDateTime = require("../utils/getDateTime.js");
+const setting = JSON.parse(
+  readFileSync(join(__dirname, "../data/setting.json"))
+);
+
+module.exports = (reinbot, m) => {
+  if (setting.features.safeMode && reinbot.busy) {
+    return;
+  }
+  const msg = m.messages[0];
+
+  if (
+    !msg.message ||
+    (msg.key && msg.key.remoteJid === "status@broadcast") ||
+    msg.broadcast
+  ) {
+    return;
+  }
+
+  const id = msg.key.remoteJid;
+  let media;
+  const isGroup = id.endsWith(".us");
+  let userId = id;
+  let groupId;
+  const pushName = msg.pushName;
+  if (isGroup) {
+    groupId = id;
+    userId = msg.key.participant;
+  }
+  const isMe = msg.key.fromMe;
+  const isOwner = userId.split("@")[0] === reinbot.owner.number;
+
+  const msgType = Object.keys(msg.message)[0];
+  const msgText =
+    msgType === "conversation"
+      ? msg.message.conversation
+      : msgType === "extendedTextMessage"
+      ? msg.message.extendedTextMessage.text
+      : msgType === "videoMessage"
+      ? msg.message.videoMessage.caption
+      : msgType === "imageMessage"
+      ? msg.message.imageMessage.caption
+      : "";
+  if (!msgText.startsWith(".")) {
+    return;
+  }
+  const command = msgText.toLowerCase().substring(1).split(" ")[0].trim();
+  const text = msgText.replace(/.(.+?)\s*\b/i, "");
+
+  function logCommand() {
+    logger("info", `COMMAND`, command);
+  }
+
+  async function reply(textReply) {
+    reinbot.busy = true;
+    try {
+      await reinbot.sendMessage(
+        id,
+        {
+          text: `⚡\x20*${
+            reinbot.name
+          }\x20ヅ*\x20|\x20*REPLY*\n\n${textReply}\n\n*⌱\x20${getDateTime()}*\n`,
+        },
+        { quoted: msg }
+      );
+      reinbot.busy = false;
+    } catch (err) {
+      logger("error", "COMMAND", err);
+      reinbot.busy = false;
+    }
+  }
+
+  async function replyCommand(textReply) {
+    reinbot.busy = true;
+    try {
+      await reinbot.sendMessage(
+        id,
+        {
+          text: `⚡\x20*${
+            reinbot.name
+          }\x20ヅ*\x20|\x20*${command.toUpperCase()}*\n\n${textReply}\n\n*⌱\x20${getDateTime()}*\n`,
+        },
+        { quoted: msg }
+      );
+      reinbot.busy = false;
+    } catch (err) {
+      logger("error", "COMMAND", err);
+      reinbot.busy = false;
+    }
+  }
+  function onlyOwner() {
+    replyCommand(
+      `‼️\x20*Hallo ${pushName}*\x20👋\nPerintah ini hanya bisa digunakan oleh owner bot\nJika anda ingin memiliki bot seperti ini jangan segan" untuk menghubungi kami\n*Terima kasih*\x20🫶\n\n*Developer\x20${reinbot.developer.name}:*\n*Whatsapp:*\x20${reinbot.developer.whatsapp}`
+    );
+  }
+
+  function onlyGroup() {
+    replyCommand(
+      "‼️\x20*ERROR:*\x20Perintah ini hanya dapat digunakan ketika dalam group chat"
+    );
+  }
+
+  require("../case")(
+    reinbot,
+    msg,
+    id,
+    media,
+    isGroup,
+    userId,
+    groupId,
+    isMe,
+    isOwner,
+    msgType,
+    msgText,
+    command,
+    text,
+    logCommand,
+    reply,
+    replyCommand,
+    onlyOwner,
+    onlyGroup
+  );
+};
