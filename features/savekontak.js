@@ -23,7 +23,7 @@ module.exports = async (
   logger
 ) => {
   switch (command) {
-    case "savechwhhddontacts":
+    case "sevkontak":
     case "savecondjsjdtact":
     case "savekonffedvfdtak":
     case "sk":
@@ -40,7 +40,7 @@ module.exports = async (
         reinbot.busy = false;
       }
       break;
-    case "savecontjdjjfactsv1":
+    case "sevkontakv1":
     case "savecovhjwjdntactv1":
     case "savekontjdndnakv1":
     case "skv1":
@@ -96,7 +96,7 @@ module.exports = async (
           reinbot.busy = false;
         });
       break;
-    case "savecontghndncactsv2":
+    case "sevkontakv2":
     case "savecontaxhdhdctv2":
     case "savekoxhdhdntakv2":
     case "skv2":
@@ -146,7 +146,7 @@ module.exports = async (
         reinbot.busy = false;
       }
       break;
-    case "savecontacndndndtsv3":
+    case "sevkontakv3":
     case "savecontxdjdjactv3":
     case "savekontahdhxhdkv3":
     case "skv3":
